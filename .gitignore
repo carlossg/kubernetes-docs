@@ -8,6 +8,10 @@ helix-importer-ui
 *.bak
 .idea
 
+# Importer working directories
+tools/importer/kubernetes-website/
+tools/importer/output/
+
 # Ensure these files are tracked
 !CLAUDE.md
 !AGENTS.md

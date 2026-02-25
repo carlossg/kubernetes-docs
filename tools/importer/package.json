@@ -1,0 +1,16 @@
+{
+  "name": "kubernetes-docs-importer",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Import Kubernetes documentation into AEM Edge Delivery via da.live",
+  "scripts": {
+    "import": "node import.mjs",
+    "import:dry": "node import.mjs --dry-run --limit 5"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "gray-matter": "^4.0.3",
+    "marked": "^15.0.6"
+  }
+}
