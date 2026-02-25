@@ -1,2 +1,4 @@
 mountpoints:
-  /: https://content.da.live/carlossg/kubernetes-docs/
+  /:
+    url: https://content.da.live/carlossg/kubernetes-docs/
+    type: markup
