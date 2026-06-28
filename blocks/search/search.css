@@ -55,6 +55,12 @@
   padding: 0 1rem;
 }
 
+@media (min-width: 900px) {
+  .search .search-results-container {
+    max-width: 1200px;
+  }
+}
+
 /* AI Answer Block */
 .search .compare-grid {
   display: grid;
@@ -79,6 +85,7 @@
   text-align: left;
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   animation: search-fadeIn 0.3s ease-out;
+  min-width: 0; /* Prevents long code blocks from forcing grid columns off-screen */
 }
 
 .search .cerebras-col {
