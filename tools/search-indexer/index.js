@@ -2,7 +2,7 @@ require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 const { globSync } = require('glob');
-const { Firestore } = require('@google-cloud/firestore');
+const { Firestore, FieldValue } = require('@google-cloud/firestore');
 const { GoogleAuth } = require('google-auth-library');
 
 // Initialize Firestore
@@ -108,10 +108,7 @@ async function indexDocs() {
                 title,
                 url: urlPath,
                 content: chunks[i],
-                embedding: {
-                    // Firestore Vector Search requires specific FieldValue format or array of floats
-                    values: embeddings[i]
-                },
+                embedding: FieldValue.vector(embeddings[i]),
                 timestamp: Firestore.FieldValue.serverTimestamp()
             });
 

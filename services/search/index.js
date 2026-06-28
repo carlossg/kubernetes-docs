@@ -3,7 +3,7 @@ require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
 const express = require('express');
 const cors = require('cors');
-const { Firestore } = require('@google-cloud/firestore');
+const { Firestore, FieldValue } = require('@google-cloud/firestore');
 const { VertexAI } = require('@google-cloud/vertexai');
 const Cerebras = require('@cerebras/cerebras_cloud_sdk');
 
@@ -68,7 +68,7 @@ app.post('/api/search', async (req, res) => {
     let docs = [];
     try {
         const collRef = firestore.collection(COLLECTION_NAME);
-        const vectorQuery = collRef.findNearest('embedding', queryVector, {
+        const vectorQuery = collRef.findNearest('embedding', FieldValue.vector(queryVector), {
             limit: 5,
             distanceMeasure: 'COSINE'
         });
