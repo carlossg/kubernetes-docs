@@ -127,6 +127,65 @@ function decorateButtons(main) {
 }
 
 /**
+ * Decorates categories list on the docs home page to render as a card grid.
+ * @param {Element} main The main container element
+ */
+function decorateCardsList(main) {
+  const isHomePage = window.location.pathname === '/' 
+    || window.location.pathname === '/index.html' 
+    || window.location.pathname.endsWith('/');
+    
+  if (isHomePage) {
+    const list = main.querySelector('ul');
+    if (list) {
+      list.classList.add('docs-home-grid');
+      
+      const items = list.querySelectorAll('li');
+      items.forEach(item => {
+        item.classList.add('docs-home-card');
+        
+        // Find the anchor tag
+        const a = item.querySelector('a');
+        if (a) {
+          // Extract text nodes for description
+          let description = '';
+          item.childNodes.forEach(node => {
+            if (node.nodeType === Node.TEXT_NODE) {
+              description += node.textContent;
+            }
+          });
+          
+          // Remove leading " - " or " – "
+          description = description.replace(/^\s*[\-\–]\s*/, '').trim();
+          
+          // Rebuild item DOM
+          item.innerHTML = '';
+          
+          const cardLink = document.createElement('a');
+          cardLink.href = a.href;
+          cardLink.className = 'card-title';
+          cardLink.textContent = a.textContent;
+          
+          const cardDesc = document.createElement('p');
+          cardDesc.className = 'card-desc';
+          cardDesc.textContent = description;
+          
+          item.append(cardLink, cardDesc);
+          
+          // Make the whole card container clickable
+          item.addEventListener('click', (e) => {
+            if (e.target !== cardLink && !e.target.closest('a')) {
+              window.location.href = a.href;
+            }
+          });
+          item.style.cursor = 'pointer';
+        }
+      });
+    }
+  }
+}
+
+/**
  * Decorates the main element.
  * @param {Element} main The main element
  */
@@ -137,6 +196,7 @@ export function decorateMain(main) {
   decorateSections(main);
   decorateBlocks(main);
   decorateButtons(main);
+  decorateCardsList(main);
 }
 
 /**

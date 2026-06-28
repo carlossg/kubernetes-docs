@@ -16,8 +16,8 @@
   --light-color: #f8f8f8;
   --dark-color: #505050;
   --text-color: #131313;
-  --link-color: #3b63fb;
-  --link-hover-color: #1d3ecf;
+  --link-color: #326ce5;
+  --link-hover-color: #1d59d1;
 
   /* fonts */
   --body-font-family: roboto, roboto-fallback, sans-serif;
@@ -323,3 +323,87 @@ main .section.highlight {
   margin: 0;
   padding: 40px 0;
 }
+
+/* Docs Home Landing Page Layout & Cards */
+main h1#kubernetes-documentation {
+  text-align: center;
+  font-size: 3rem;
+  font-weight: 700;
+  color: #212529;
+  margin-top: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+main h1#kubernetes-documentation + p {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #5f6368;
+  max-width: 600px;
+  margin: 0 auto 2.5rem auto;
+}
+
+/* Card Grid Layout */
+.docs-home-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  padding: 0;
+  margin: 3rem 0;
+  list-style: none;
+}
+
+@media (min-width: 768px) {
+  .docs-home-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .docs-home-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Card Container */
+.docs-home-card {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 1.75rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02), 0 1px 3px rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Card Hover Elevation */
+.docs-home-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(50, 108, 229, 0.08), 0 2px 4px rgba(50, 108, 229, 0.04);
+  border-color: var(--link-color);
+}
+
+/* Card Title */
+.docs-home-card .card-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #212529;
+  text-decoration: none;
+  margin-bottom: 0.75rem;
+  display: inline-block;
+  transition: color 0.2s ease;
+}
+
+.docs-home-card:hover .card-title {
+  color: var(--link-color);
+  text-decoration: none;
+}
+
+/* Card Description */
+.docs-home-card .card-desc {
+  margin: 0;
+  color: #5f6368;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
