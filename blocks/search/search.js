@@ -1,6 +1,6 @@
 import { decorateIcons } from '../../scripts/aem.js';
 
-const BACKEND_URL = 'http://localhost:8080/api/search'; // This should be configurable via AEM block properties
+const BACKEND_URL = 'https://kubernetes-search-backend-642841493686.us-central1.run.app/api/search';
 
 function createSearchBox() {
   const container = document.createElement('div');
