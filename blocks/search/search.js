@@ -31,7 +31,8 @@ function createResultsContainer() {
   aiAnswer.className = 'ai-answer hidden';
   
   const aiTitle = document.createElement('h3');
-  aiTitle.innerHTML = '✨ AI Answer';
+  aiTitle.className = 'ai-title';
+  aiTitle.innerHTML = '<span>✨ AI Answer</span>';
   
   const aiText = document.createElement('div');
   aiText.className = 'ai-text';
@@ -46,7 +47,7 @@ function createResultsContainer() {
 
   container.append(aiAnswer, citationsList);
 
-  return { container, aiAnswer, aiText, cursor, citationsList };
+  return { container, aiAnswer, aiTitle, aiText, cursor, citationsList };
 }
 
 function cleanMarkdownSnippet(text) {
@@ -196,12 +197,16 @@ function parseMarkdown(text) {
 }
 
 async function handleSearch(query, elements) {
-  const { aiAnswer, aiText, cursor, citationsList } = elements;
+  const { aiAnswer, aiTitle, aiText, cursor, citationsList } = elements;
   
   aiAnswer.classList.remove('hidden');
   citationsList.classList.add('hidden');
   aiText.textContent = '';
   cursor.style.display = 'inline-block';
+
+  // Clear previous speed badge
+  const existingBadge = aiTitle.querySelector('.speed-badge');
+  if (existingBadge) existingBadge.remove();
 
   // Update the URL query parameter
   const url = new URL(window.location.href);
@@ -222,20 +227,41 @@ async function handleSearch(query, elements) {
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let accumulatedText = '';
+    let startTime = null;
+    let charCount = 0;
     
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
       
       const chunk = decoder.decode(value, { stream: true });
-      // We expect the backend to stream NDJSON (Newline Delimited JSON)
       const lines = chunk.split('\n').filter(line => line.trim() !== '');
       
       for (const line of lines) {
         try {
           const data = JSON.parse(line);
           if (data.type === 'text') {
+            if (startTime === null) {
+              startTime = Date.now();
+            }
             accumulatedText += data.content;
+            charCount += data.content.length;
+            
+            // Speed calculation (1 token ≈ 4 characters)
+            const elapsed = (Date.now() - startTime) / 1000;
+            if (elapsed > 0.1) {
+              const estimatedTokens = Math.round(charCount / 4);
+              const tps = Math.round(estimatedTokens / elapsed);
+              
+              let badge = aiTitle.querySelector('.speed-badge');
+              if (!badge) {
+                badge = document.createElement('span');
+                badge.className = 'speed-badge';
+                aiTitle.append(badge);
+              }
+              badge.innerHTML = `⚡ ${tps.toLocaleString()} tok/s via Cerebras`;
+            }
+            
             aiText.innerHTML = parseMarkdown(accumulatedText);
           } else if (data.type === 'citations') {
             renderCitations(data.citations, citationsList);
