@@ -159,3 +159,61 @@
   border-radius: 8px;
   margin-top: 1rem;
 }
+
+/* AI Answer Markdown Typography */
+.search .ai-text p {
+  margin: 0 0 1rem 0;
+}
+
+.search .ai-text p:last-child {
+  margin-bottom: 0;
+}
+
+.search .ai-text ul {
+  margin: 0 0 1rem 1.5rem;
+  padding: 0;
+  list-style-type: disc;
+}
+
+.search .ai-text li {
+  margin-bottom: 0.5rem;
+}
+
+.search .ai-text strong {
+  font-weight: 600;
+  color: #111;
+}
+
+.search .ai-text code {
+  font-family: SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+  background-color: #e8eaed;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.9em;
+  color: #c7254e;
+}
+
+.search .ai-text pre {
+  background-color: #202124;
+  color: #fff;
+  padding: 1rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+}
+
+.search .ai-text pre code {
+  background-color: transparent;
+  padding: 0;
+  color: inherit;
+  font-size: 0.95em;
+  border-radius: 0;
+}
+
+.search .ai-text h3 {
+  margin: 1.5rem 0 1rem 0;
+  font-size: 1.25rem;
+  color: #202124;
+  font-weight: 600;
+}
+

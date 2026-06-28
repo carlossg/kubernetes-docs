@@ -74,6 +74,89 @@ function renderCitations(citations, container) {
   });
 }
 
+function escapeHtml(text) {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function parseMarkdown(text) {
+  // If there's an unclosed code block, temporarily close it for parsing during stream
+  let textToParse = text;
+  const backticksCount = (text.match(/```/g) || []).length;
+  if (backticksCount % 2 !== 0) {
+    textToParse += '\n```';
+  }
+
+  let html = textToParse;
+
+  // 1. Code blocks (extract and place in placeholders first to avoid parsing markup inside them)
+  const codeBlocks = [];
+  html = html.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
+    const placeholder = `__CODE_BLOCK_PLACEHOLDER_${codeBlocks.length}__`;
+    codeBlocks.push(`<pre><code class="language-${lang || 'text'}">${escapeHtml(code.trim())}</code></pre>`);
+    return placeholder;
+  });
+
+  // 2. Inline code
+  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+  // 3. Headings
+  html = html.replace(/^### (.*?)$/gm, '<h3>$1</h3>');
+  html = html.replace(/^## (.*?)$/gm, '<h2>$1</h2>');
+  html = html.replace(/^# (.*?)$/gm, '<h1>$1</h1>');
+
+  // 4. Bullet lists
+  const lines = html.split('\n');
+  let inList = false;
+  const processedLines = lines.map(line => {
+    const listMatch = line.match(/^[\*\-]\s+(.*)$/);
+    if (listMatch) {
+      let content = listMatch[1];
+      // Inline formatting for list items
+      content = content.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      content = content.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+      if (!inList) {
+        inList = true;
+        return '<ul><li>' + content + '</li>';
+      }
+      return '<li>' + content + '</li>';
+    } else {
+      if (inList && line.trim() !== '') {
+        inList = false;
+        return '</ul>' + line;
+      }
+      return line;
+    }
+  });
+  if (inList) processedLines.push('</ul>');
+  html = processedLines.join('\n');
+
+  // 5. Bold & Italic (outside lists/code)
+  html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+
+  // 6. Paragraphs (split by double newlines)
+  html = html.split(/\n\n+/).map(para => {
+    para = para.trim();
+    if (!para) return '';
+    if (para.startsWith('<h') || para.startsWith('<pre') || para.startsWith('<ul') || para.startsWith('<li>') || para.startsWith('</ul')) {
+      return para;
+    }
+    return `<p>${para.replace(/\n/g, '<br>')}</p>`;
+  }).join('');
+
+  // Restore code blocks
+  codeBlocks.forEach((blockHtml, index) => {
+    html = html.replace(`__CODE_BLOCK_PLACEHOLDER_${index}__`, blockHtml);
+  });
+
+  return html;
+}
+
 async function handleSearch(query, elements) {
   const { aiAnswer, aiText, cursor, citationsList } = elements;
   
@@ -100,6 +183,7 @@ async function handleSearch(query, elements) {
 
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
+    let accumulatedText = '';
     
     while (true) {
       const { done, value } = await reader.read();
@@ -113,7 +197,8 @@ async function handleSearch(query, elements) {
         try {
           const data = JSON.parse(line);
           if (data.type === 'text') {
-            aiText.textContent += data.content;
+            accumulatedText += data.content;
+            aiText.innerHTML = parseMarkdown(accumulatedText);
           } else if (data.type === 'citations') {
             renderCitations(data.citations, citationsList);
           }
