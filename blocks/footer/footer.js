@@ -28,7 +28,7 @@ export default async function decorate(block) {
   // Add the CC-BY-4.0 license notice
   const licenseDiv = document.createElement('div');
   licenseDiv.className = 'footer-license';
-  licenseDiv.innerHTML = '<p>© 2026 The Kubernetes Authors | Documentation distributed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>. Sourced and adapted from <a href="https://github.com/kubernetes/website" target="_blank" rel="noopener noreferrer">kubernetes/website</a>.</p>';
+  licenseDiv.innerHTML = '<p>Documentation © 2026 The Kubernetes Authors distributed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>. Sourced and adapted from <a href="https://github.com/kubernetes/website" target="_blank" rel="noopener noreferrer">kubernetes/website</a>.</p>';
   footer.append(licenseDiv);
 
   block.append(footer);
