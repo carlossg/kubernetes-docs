@@ -18,3 +18,22 @@ footer .footer p {
     padding: 40px 32px 24px;
   }
 }
+
+footer .footer-license {
+  border-top: 1px solid #e5e7eb;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #5f6368;
+}
+
+footer .footer-license a {
+  color: var(--link-color);
+  text-decoration: underline;
+}
+
+footer .footer-license a:hover {
+  color: var(--link-hover-color);
+}
+
