@@ -1,6 +1,6 @@
-/* Search Block CSS */
+/* Search Block CSS - Scoped to .search block */
 
-.search-box {
+.search .search-box {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -9,7 +9,7 @@
   padding: 2rem 1rem;
 }
 
-.search-input-container {
+.search .search-input-container {
   position: relative;
   display: flex;
   align-items: center;
@@ -19,12 +19,12 @@
   transition: box-shadow 0.3s ease;
 }
 
-.search-input-container:focus-within {
+.search .search-input-container:focus-within {
   box-shadow: 0 6px 16px rgba(50, 108, 229, 0.2);
   outline: 2px solid #326ce5; /* Kubernetes Blue */
 }
 
-.search-input-container input {
+.search .search-input-container input {
   width: 100%;
   padding: 1rem 1.5rem;
   font-size: 1.125rem;
@@ -34,11 +34,11 @@
   color: #333;
 }
 
-.search-input-container input:focus {
+.search .search-input-container input:focus {
   outline: none;
 }
 
-.search-icon {
+.search .search-icon {
   margin-right: 1.5rem;
   color: #666;
   width: 24px;
@@ -46,14 +46,17 @@
 }
 
 /* Results Container */
-.search-results-container {
+.search .search-results-container {
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 1rem;
 }
 
 /* AI Answer Stream */
-.ai-answer {
+.search .ai-answer {
   background: #f8f9fa;
   border-left: 4px solid #326ce5;
   padding: 1.5rem;
@@ -62,14 +65,14 @@
   line-height: 1.6;
   color: #202124;
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  animation: fadeIn 0.3s ease-out;
+  animation: search-fadeIn 0.3s ease-out;
 }
 
-.ai-answer.hidden {
+.search .ai-answer.hidden {
   display: none;
 }
 
-.ai-answer h3 {
+.search .ai-answer h3 {
   margin-top: 0;
   margin-bottom: 1rem;
   font-size: 1.1rem;
@@ -80,28 +83,28 @@
 }
 
 /* Streaming cursor effect */
-.ai-answer .cursor {
+.search .ai-answer .cursor {
   display: inline-block;
   width: 8px;
   height: 1.1em;
   background-color: #326ce5;
   vertical-align: middle;
-  animation: blink 1s step-end infinite;
+  animation: search-blink 1s step-end infinite;
   margin-left: 2px;
 }
 
-@keyframes blink {
+@keyframes search-blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
 }
 
-@keyframes fadeIn {
+@keyframes search-fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 /* Citations / Related Docs */
-.citations-list {
+.search .citations-list {
   list-style: none;
   padding: 0;
   margin: 0;
@@ -110,24 +113,25 @@
   gap: 1rem;
 }
 
-.citations-list.hidden {
+.search .citations-list.hidden {
   display: none;
 }
 
-.citation-card {
+.search .citation-card {
   padding: 1rem;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   transition: transform 0.2s, box-shadow 0.2s;
+  background: #fff;
 }
 
-.citation-card:hover {
+.search .citation-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0,0,0,0.05);
   border-color: #326ce5;
 }
 
-.citation-card a {
+.search .citation-card a {
   text-decoration: none;
   color: #326ce5;
   font-weight: 600;
@@ -136,7 +140,7 @@
   margin-bottom: 0.5rem;
 }
 
-.citation-card p {
+.search .citation-card p {
   margin: 0;
   color: #5f6368;
   font-size: 0.95rem;
@@ -148,7 +152,7 @@
 }
 
 /* Error state */
-.search-error {
+.search .search-error {
   color: #d32f2f;
   background: #ffebee;
   padding: 1rem;
