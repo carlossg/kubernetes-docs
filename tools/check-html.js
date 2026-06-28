@@ -17,6 +17,14 @@ async function checkHTML() {
   console.log(html);
   console.log('-----------------------\n');
   
+  const citations = await page.$('.citations-list');
+  if (citations) {
+    const citationsHtml = await citations.innerHTML();
+    console.log('--- Citations HTML Output ---');
+    console.log(citationsHtml);
+    console.log('-----------------------------\n');
+  }
+  
   await browser.close();
 }
 
