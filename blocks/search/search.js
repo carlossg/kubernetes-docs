@@ -259,7 +259,7 @@ async function handleSearch(query, elements) {
                 badge.className = 'speed-badge';
                 aiTitle.append(badge);
               }
-              badge.innerHTML = `⚡ ${tps.toLocaleString()} tok/s via Cerebras`;
+              badge.innerHTML = `⚡ ${tps.toLocaleString()} tok/s (Gemma 4) via Cerebras`;
             }
             
             aiText.innerHTML = parseMarkdown(accumulatedText);
