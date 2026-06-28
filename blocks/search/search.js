@@ -113,7 +113,7 @@ function parseMarkdown(text) {
   const lines = html.split('\n');
   let inList = false;
   const processedLines = lines.map(line => {
-    const listMatch = line.match(/^[\*\-]\s+(.*)$/);
+    const listMatch = line.match(/^\s*[\*\-]\s+(.*)$/);
     if (listMatch) {
       let content = listMatch[1];
       // Inline formatting for list items
