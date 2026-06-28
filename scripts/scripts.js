@@ -186,6 +186,29 @@ function decorateCardsList(main) {
 }
 
 /**
+ * Groups home page title, description, and search block into a hero banner.
+ * @param {Element} main The main container element
+ */
+function decorateHeroBanner(main) {
+  const isHomePage = window.location.pathname === '/' 
+    || window.location.pathname === '/index.html' 
+    || window.location.pathname.endsWith('/');
+    
+  if (isHomePage) {
+    const h1 = main.querySelector('h1#kubernetes-documentation');
+    const p = h1?.nextElementSibling;
+    const searchWrapper = main.querySelector('.search-wrapper');
+    
+    if (h1 && p && searchWrapper) {
+      const banner = document.createElement('div');
+      banner.className = 'docs-home-banner';
+      h1.before(banner);
+      banner.append(h1, p, searchWrapper);
+    }
+  }
+}
+
+/**
  * Decorates the main element.
  * @param {Element} main The main element
  */
@@ -196,6 +219,7 @@ export function decorateMain(main) {
   decorateSections(main);
   decorateBlocks(main);
   decorateButtons(main);
+  decorateHeroBanner(main);
   decorateCardsList(main);
 }
 
