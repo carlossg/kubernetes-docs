@@ -82,6 +82,11 @@ async function handleSearch(query, elements) {
   aiText.textContent = '';
   cursor.style.display = 'inline-block';
 
+  // Update the URL query parameter
+  const url = new URL(window.location.href);
+  url.searchParams.set('q', query);
+  window.history.replaceState({}, '', url.toString());
+
   try {
     const response = await fetch(BACKEND_URL, {
       method: 'POST',
@@ -136,7 +141,6 @@ export default async function decorate(block) {
   // AEM EDS icon decoration
   decorateIcons(block);
 
-  let searchTimeout;
   input.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
       const query = input.value.trim();
@@ -145,4 +149,12 @@ export default async function decorate(block) {
       }
     }
   });
+
+  // Check URL parameters on load
+  const searchParams = new URLSearchParams(window.location.search);
+  const initialQuery = searchParams.get('q');
+  if (initialQuery) {
+    input.value = initialQuery;
+    handleSearch(initialQuery, results);
+  }
 }

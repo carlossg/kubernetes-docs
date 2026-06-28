@@ -12,9 +12,11 @@ app.use(cors());
 app.use(express.json());
 
 // Initialize Google Cloud clients
-const projectId = process.env.GOOGLE_CLOUD_PROJECT || 'arco-recommender';
+const { GoogleAuth } = require('google-auth-library');
+const projectId = process.env.GOOGLE_CLOUD_PROJECT || 'api-project-642841493686';
 const firestore = new Firestore({ projectId });
 const vertex_ai = new VertexAI({ project: projectId, location: 'us-central1' });
+const auth = new GoogleAuth({ scopes: ['https://www.googleapis.com/auth/cloud-platform'] });
 // Cerebras client automatically uses CEREBRAS_API_KEY environment variable
 const cerebras = new Cerebras(); 
 
@@ -35,7 +37,8 @@ app.post('/api/search', async (req, res) => {
     // 1. Generate Query Embedding using Vertex AI
     let queryVector = [];
     try {
-        const tokenResponse = await firestore.authClient?.getAccessToken();
+        const client = await auth.getClient();
+        const tokenResponse = await client.getAccessToken();
         const token = typeof tokenResponse === 'string' ? tokenResponse : tokenResponse?.token;
         
         if (token) {

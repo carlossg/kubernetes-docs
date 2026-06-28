@@ -3,9 +3,12 @@ const fs = require('fs');
 const path = require('path');
 const { globSync } = require('glob');
 const { Firestore } = require('@google-cloud/firestore');
+const { GoogleAuth } = require('google-auth-library');
 
 // Initialize Firestore
-const firestore = new Firestore();
+const projectId = process.env.GOOGLE_CLOUD_PROJECT || 'api-project-642841493686';
+const firestore = new Firestore({ projectId });
+const auth = new GoogleAuth({ scopes: ['https://www.googleapis.com/auth/cloud-platform'] });
 const COLLECTION_NAME = 'k8s_docs';
 
 const CONTENT_DIR = path.resolve(__dirname, '../../website/content/en/docs');
@@ -33,14 +36,14 @@ function chunkText(text, maxTokens = 800) {
 
 // Generate Embeddings using Vertex AI
 async function getEmbeddings(texts) {
-    const PROJECT_ID = process.env.GOOGLE_CLOUD_PROJECT;
+    const PROJECT_ID = process.env.GOOGLE_CLOUD_PROJECT || 'api-project-642841493686';
     const LOCATION = 'us-central1';
     const MODEL = 'text-embedding-004';
     
-    // In a real scenario, this uses the Google Auth Library to get a token
-    // For this implementation plan, we demonstrate the standard fetch call structure
     try {
-        const token = await firestore.authClient.getAccessToken();
+        const client = await auth.getClient();
+        const tokenResponse = await client.getAccessToken();
+        const token = typeof tokenResponse === 'string' ? tokenResponse : tokenResponse?.token;
         const response = await fetch(`https://${LOCATION}-aiplatform.googleapis.com/v1/projects/${PROJECT_ID}/locations/${LOCATION}/publishers/google/models/${MODEL}:predict`, {
             method: 'POST',
             headers: {
@@ -74,7 +77,10 @@ async function indexDocs() {
     const MAX_BATCH_SIZE = 100;
 
     // Process a limited number of files for demonstration to avoid long runtimes
-    const filesToProcess = files.slice(0, 10); 
+    const filesToProcess = [
+        ...files.slice(0, 10),
+        'concepts/workloads/autoscaling/vertical-pod-autoscale.md'
+    ]; 
 
     for (const file of filesToProcess) {
         const fullPath = path.join(CONTENT_DIR, file);
