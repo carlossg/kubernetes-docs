@@ -31,7 +31,7 @@ function createResultsContainer() {
   aiAnswer.className = 'ai-answer hidden';
   
   const aiTitle = document.createElement('h3');
-  aiTitle.innerHTML = '<span class="icon icon-sparkle"></span> AI Answer';
+  aiTitle.innerHTML = '✨ AI Answer';
   
   const aiText = document.createElement('div');
   aiText.className = 'ai-text';
