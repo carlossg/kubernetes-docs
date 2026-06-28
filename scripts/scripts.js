@@ -32,6 +32,18 @@ function buildHeroBlock(main) {
 }
 
 /**
+ * Builds search block and appends to main in a new section if not present.
+ * @param {Element} main The container element
+ */
+function buildSearchBlock(main) {
+  if (!main.querySelector('.search')) {
+    const section = document.createElement('div');
+    section.append(buildBlock('search', []));
+    main.append(section);
+  }
+}
+
+/**
  * load fonts.css and set a session storage flag
  */
 async function loadFonts() {
@@ -68,6 +80,7 @@ function buildAutoBlocks(main) {
     }
 
     buildHeroBlock(main);
+    buildSearchBlock(main);
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('Auto Blocking failed', error);
