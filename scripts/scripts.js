@@ -195,15 +195,23 @@ function decorateHeroBanner(main) {
     || window.location.pathname.endsWith('/');
     
   if (isHomePage) {
-    const h1 = main.querySelector('h1#kubernetes-documentation');
-    const p = h1?.nextElementSibling;
+    const h1 = main.querySelector('h1');
     const searchWrapper = main.querySelector('.search-wrapper');
     
-    if (h1 && p && searchWrapper) {
+    if (h1 && searchWrapper) {
       const banner = document.createElement('div');
       banner.className = 'docs-home-banner';
       h1.before(banner);
-      banner.append(h1, p, searchWrapper);
+      
+      banner.append(h1);
+      
+      // If there's a paragraph after the banner (originally after h1), it is the subtitle
+      const subtitle = banner.nextElementSibling;
+      if (subtitle && subtitle.tagName === 'P' && !subtitle.classList.contains('search-wrapper')) {
+        banner.append(subtitle);
+      }
+      
+      banner.append(searchWrapper);
     }
   }
 }
