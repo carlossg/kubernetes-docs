@@ -27,27 +27,48 @@ function createResultsContainer() {
   const container = document.createElement('div');
   container.className = 'search-results-container';
 
-  const aiAnswer = document.createElement('div');
-  aiAnswer.className = 'ai-answer hidden';
-  
-  const aiTitle = document.createElement('h3');
-  aiTitle.className = 'ai-title';
-  aiTitle.innerHTML = '<span>✨ AI Answer</span>';
-  
-  const aiText = document.createElement('div');
-  aiText.className = 'ai-text';
-  
-  const cursor = document.createElement('span');
-  cursor.className = 'cursor';
-  
-  aiAnswer.append(aiTitle, aiText, cursor);
+  // Compare Grid
+  const compareGrid = document.createElement('div');
+  compareGrid.className = 'compare-grid';
+
+  // Left Column: Cerebras
+  const cerebrasCol = document.createElement('div');
+  cerebrasCol.className = 'ai-answer cerebras-col hidden';
+  const cerebrasTitle = document.createElement('h3');
+  cerebrasTitle.className = 'ai-title';
+  cerebrasTitle.innerHTML = '<span>✨ Cerebras (Gemma 4)</span>';
+  const cerebrasText = document.createElement('div');
+  cerebrasText.className = 'ai-text';
+  const cerebrasCursor = document.createElement('span');
+  cerebrasCursor.className = 'cursor';
+  cerebrasCol.append(cerebrasTitle, cerebrasText, cerebrasCursor);
+
+  // Right Column: Gemini
+  const geminiCol = document.createElement('div');
+  geminiCol.className = 'ai-answer gemini-col hidden';
+  const geminiTitle = document.createElement('h3');
+  geminiTitle.className = 'ai-title';
+  geminiTitle.innerHTML = '<span>♊ Gemini (Flash)</span>';
+  const geminiText = document.createElement('div');
+  geminiText.className = 'ai-text';
+  const geminiCursor = document.createElement('span');
+  geminiCursor.className = 'cursor';
+  geminiCol.append(geminiTitle, geminiText, geminiCursor);
+
+  compareGrid.append(cerebrasCol, geminiCol);
 
   const citationsList = document.createElement('ul');
   citationsList.className = 'citations-list hidden';
 
-  container.append(aiAnswer, citationsList);
+  container.append(compareGrid, citationsList);
 
-  return { container, aiAnswer, aiTitle, aiText, cursor, citationsList };
+  return { 
+    container, 
+    compareGrid,
+    cerebrasCol, cerebrasTitle, cerebrasText, cerebrasCursor,
+    geminiCol, geminiTitle, geminiText, geminiCursor,
+    citationsList 
+  };
 }
 
 function cleanMarkdownSnippet(text) {
@@ -197,16 +218,26 @@ function parseMarkdown(text) {
 }
 
 async function handleSearch(query, elements) {
-  const { aiAnswer, aiTitle, aiText, cursor, citationsList } = elements;
+  const { 
+    cerebrasCol, cerebrasTitle, cerebrasText, cerebrasCursor,
+    geminiCol, geminiTitle, geminiText, geminiCursor,
+    citationsList 
+  } = elements;
   
-  aiAnswer.classList.remove('hidden');
+  cerebrasCol.classList.remove('hidden');
+  geminiCol.classList.remove('hidden');
   citationsList.classList.add('hidden');
-  aiText.textContent = '';
-  cursor.style.display = 'inline-block';
+  
+  cerebrasText.textContent = '';
+  geminiText.textContent = '';
+  cerebrasCursor.style.display = 'inline-block';
+  geminiCursor.style.display = 'inline-block';
 
-  // Clear previous speed badge
-  const existingBadge = aiTitle.querySelector('.speed-badge');
-  if (existingBadge) existingBadge.remove();
+  // Clear previous speed badges
+  const cBadge = cerebrasTitle.querySelector('.speed-badge');
+  if (cBadge) cBadge.remove();
+  const gBadge = geminiTitle.querySelector('.speed-badge');
+  if (gBadge) gBadge.remove();
 
   // Update the URL query parameter
   const url = new URL(window.location.href);
@@ -226,9 +257,13 @@ async function handleSearch(query, elements) {
 
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
-    let accumulatedText = '';
-    let startTime = null;
-    let charCount = 0;
+    
+    let cerebrasTextAccumulated = '';
+    let geminiTextAccumulated = '';
+    let cerebrasStartTime = null;
+    let geminiStartTime = null;
+    let cerebrasCharCount = 0;
+    let geminiCharCount = 0;
     
     while (true) {
       const { done, value } = await reader.read();
@@ -241,28 +276,52 @@ async function handleSearch(query, elements) {
         try {
           const data = JSON.parse(line);
           if (data.type === 'text') {
-            if (startTime === null) {
-              startTime = Date.now();
-            }
-            accumulatedText += data.content;
-            charCount += data.content.length;
-            
-            // Speed calculation (1 token ≈ 4 characters)
-            const elapsed = (Date.now() - startTime) / 1000;
-            if (elapsed > 0.1) {
-              const estimatedTokens = Math.round(charCount / 4);
-              const tps = Math.round(estimatedTokens / elapsed);
-              
-              let badge = aiTitle.querySelector('.speed-badge');
-              if (!badge) {
-                badge = document.createElement('span');
-                badge.className = 'speed-badge';
-                aiTitle.append(badge);
+            if (data.provider === 'gemini') {
+              if (geminiStartTime === null) {
+                geminiStartTime = Date.now();
               }
-              badge.innerHTML = `⚡ ${tps.toLocaleString()} tok/s (Gemma 4) via Cerebras`;
+              geminiTextAccumulated += data.content;
+              geminiCharCount += data.content.length;
+              
+              const elapsed = (Date.now() - geminiStartTime) / 1000;
+              if (elapsed > 0.1) {
+                const estimatedTokens = Math.round(geminiCharCount / 4);
+                const tps = Math.round(estimatedTokens / elapsed);
+                
+                let badge = geminiTitle.querySelector('.speed-badge');
+                if (!badge) {
+                  badge = document.createElement('span');
+                  badge.className = 'speed-badge';
+                  geminiTitle.append(badge);
+                }
+                badge.innerHTML = `⚡ ${tps.toLocaleString()} tok/s`;
+              }
+              
+              geminiText.innerHTML = parseMarkdown(geminiTextAccumulated);
+            } else {
+              // Default to Cerebras
+              if (cerebrasStartTime === null) {
+                cerebrasStartTime = Date.now();
+              }
+              cerebrasTextAccumulated += data.content;
+              cerebrasCharCount += data.content.length;
+              
+              const elapsed = (Date.now() - cerebrasStartTime) / 1000;
+              if (elapsed > 0.1) {
+                const estimatedTokens = Math.round(cerebrasCharCount / 4);
+                const tps = Math.round(estimatedTokens / elapsed);
+                
+                let badge = cerebrasTitle.querySelector('.speed-badge');
+                if (!badge) {
+                  badge = document.createElement('span');
+                  badge.className = 'speed-badge';
+                  cerebrasTitle.append(badge);
+                }
+                badge.innerHTML = `⚡ ${tps.toLocaleString()} tok/s`;
+              }
+              
+              cerebrasText.innerHTML = parseMarkdown(cerebrasTextAccumulated);
             }
-            
-            aiText.innerHTML = parseMarkdown(accumulatedText);
           } else if (data.type === 'citations') {
             renderCitations(data.citations, citationsList);
           }
@@ -273,9 +332,11 @@ async function handleSearch(query, elements) {
     }
   } catch (error) {
     console.error('Search failed:', error);
-    aiText.innerHTML = '<span class="search-error">Sorry, an error occurred while searching. Please try again later.</span>';
+    cerebrasText.innerHTML = '<span class="search-error">Sorry, an error occurred while searching.</span>';
+    geminiText.innerHTML = '<span class="search-error">Sorry, an error occurred while searching.</span>';
   } finally {
-    cursor.style.display = 'none';
+    cerebrasCursor.style.display = 'none';
+    geminiCursor.style.display = 'none';
   }
 }
 

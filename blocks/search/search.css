@@ -55,10 +55,22 @@
   padding: 0 1rem;
 }
 
-/* AI Answer Stream */
+/* AI Answer Block */
+.search .compare-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+@media (min-width: 900px) {
+  .search .compare-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 .search .ai-answer {
   background: #f8f9fa;
-  border-left: 4px solid #326ce5;
   padding: 1.5rem;
   border-radius: 0 8px 8px 0;
   font-size: 1.05rem;
@@ -67,6 +79,19 @@
   text-align: left;
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   animation: search-fadeIn 0.3s ease-out;
+}
+
+.search .cerebras-col {
+  border-left: 4px solid #f59e0b; /* Amber for Cerebras */
+}
+
+.search .gemini-col {
+  border-left: 4px solid #4285f4; /* Blue for Gemini */
+}
+
+.search .gemini-col .speed-badge {
+  background: linear-gradient(135deg, #4285f4 0%, #1a73e8 100%);
+  box-shadow: 0 2px 4px rgba(66, 133, 244, 0.15);
 }
 
 .search .ai-answer.hidden {
