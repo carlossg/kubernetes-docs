@@ -1,0 +1,14 @@
+{
+  "name": "kubernetes-search-indexer",
+  "version": "1.0.0",
+  "description": "Indexes Kubernetes website content into Firestore Vector DB",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@google-cloud/firestore": "^7.8.0",
+    "glob": "^10.4.1",
+    "dotenv": "^16.4.5"
+  }
+}
