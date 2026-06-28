@@ -49,6 +49,15 @@ function createResultsContainer() {
   return { container, aiAnswer, aiText, cursor, citationsList };
 }
 
+function cleanMarkdownSnippet(text) {
+  if (!text) return '';
+  return text
+    .replace(/```\w*/g, '')        // Remove code block ticks and language tags (e.g. ```yaml)
+    .replace(/[`\*#_\-\+]/g, '')   // Remove markdown symbols (ticks, asterisks, hashes, bullet indicators)
+    .replace(/\s+/g, ' ')          // Flatten newlines and multiple spaces into single spaces
+    .trim();
+}
+
 function renderCitations(citations, container) {
   container.innerHTML = '';
   if (!citations || citations.length === 0) {
@@ -67,7 +76,7 @@ function renderCitations(citations, container) {
     a.textContent = cit.title || cit.url;
     
     const p = document.createElement('p');
-    p.textContent = cit.snippet || '';
+    p.textContent = cleanMarkdownSnippet(cit.snippet);
     
     li.append(a, p);
     container.append(li);
