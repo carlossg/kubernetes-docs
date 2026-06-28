@@ -66,19 +66,48 @@ function renderCitations(citations, container) {
   }
   
   container.classList.remove('hidden');
+  
+  // Group citations by URL to avoid duplicate cards
+  const grouped = {};
   citations.forEach((cit) => {
+    const url = cit.url;
+    if (!grouped[url]) {
+      grouped[url] = {
+        title: cit.title || url,
+        url: url,
+        snippets: []
+      };
+    }
+    const cleanSnippet = cleanMarkdownSnippet(cit.snippet);
+    if (cleanSnippet && !grouped[url].snippets.includes(cleanSnippet)) {
+      grouped[url].snippets.push(cleanSnippet);
+    }
+  });
+  
+  // Render consolidated cards
+  Object.values(grouped).forEach((doc) => {
     const li = document.createElement('li');
     li.className = 'citation-card';
     
     const a = document.createElement('a');
-    a.href = cit.url;
+    a.href = doc.url;
     a.target = '_blank';
-    a.textContent = cit.title || cit.url;
+    a.textContent = doc.title;
     
-    const p = document.createElement('p');
-    p.textContent = cleanMarkdownSnippet(cit.snippet);
+    li.append(a);
     
-    li.append(a, p);
+    const snippetsDiv = document.createElement('div');
+    snippetsDiv.className = 'citation-snippets';
+    
+    // Show up to 2 unique snippets per source to keep the card compact
+    doc.snippets.slice(0, 2).forEach((snippet) => {
+      const p = document.createElement('p');
+      p.className = 'citation-snippet';
+      p.textContent = snippet;
+      snippetsDiv.append(p);
+    });
+    
+    li.append(snippetsDiv);
     container.append(li);
   });
 }

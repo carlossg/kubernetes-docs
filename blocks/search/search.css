@@ -140,15 +140,31 @@
   margin-bottom: 0.5rem;
 }
 
-.search .citation-card p {
+.search .citation-snippets {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.search .citation-snippet {
   margin: 0;
   color: #5f6368;
   font-size: 0.95rem;
   line-height: 1.4;
+  position: relative;
+  padding-left: 1rem;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.search .citation-snippet::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: #326ce5; /* Kubernetes Blue */
+  font-weight: bold;
 }
 
 /* Error state */
