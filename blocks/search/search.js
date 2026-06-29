@@ -94,7 +94,7 @@ function createResultsContainer() {
   cerebrasCol.className = 'ai-answer cerebras-col hidden';
   const cerebrasTitle = document.createElement('h3');
   cerebrasTitle.className = 'ai-title';
-  cerebrasTitle.innerHTML = '<span>✨ Cerebras (Gemma 4)</span>';
+  cerebrasTitle.innerHTML = '<span>✨ Cerebras (gemma-4-31b)</span>';
   const cerebrasText = document.createElement('div');
   cerebrasText.className = 'ai-text';
   const cerebrasCursor = document.createElement('span');
@@ -106,7 +106,7 @@ function createResultsContainer() {
   geminiCol.className = 'ai-answer gemini-col hidden';
   const geminiTitle = document.createElement('h3');
   geminiTitle.className = 'ai-title';
-  geminiTitle.innerHTML = '<span>♊ Gemini (Flash)</span>';
+  geminiTitle.innerHTML = '<span>♊ Gemini (gemini-3.5-flash)</span>';
   const geminiText = document.createElement('div');
   geminiText.className = 'ai-text';
   const geminiCursor = document.createElement('span');
@@ -295,6 +295,12 @@ async function handleSearch(query, elements, roleSelect, envSelect) {
   geminiText.textContent = '';
   cerebrasCursor.style.display = 'inline-block';
   geminiCursor.style.display = 'inline-block';
+
+  // Reset titles to defaults
+  const cSpan = cerebrasTitle.querySelector('span');
+  if (cSpan) cSpan.textContent = '✨ Cerebras (gemma-4-31b)';
+  const gSpan = geminiTitle.querySelector('span');
+  if (gSpan) gSpan.textContent = '♊ Gemini (gemini-3.5-flash)';
 
   // Clear previous speed badges
   const cBadge = cerebrasTitle.querySelector('.speed-badge');
