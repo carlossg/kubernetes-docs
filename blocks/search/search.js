@@ -281,6 +281,7 @@ function parseMarkdown(text) {
 }
 
 async function handleSearch(query, elements, roleSelect, envSelect) {
+  const searchStartTime = Date.now();
   const {
     cerebrasCol, cerebrasTitle, cerebrasText, cerebrasCursor,
     geminiCol, geminiTitle, geminiText, geminiCursor,
@@ -370,10 +371,13 @@ async function handleSearch(query, elements, roleSelect, envSelect) {
               geminiTextAccumulated += data.content;
               geminiCharCount += data.content.length;
 
-              const elapsed = (Date.now() - geminiStartTime) / 1000;
-              if (elapsed > 0.1) {
+              const totalElapsed = (Date.now() - searchStartTime) / 1000;
+              const elapsedStreaming = (Date.now() - geminiStartTime) / 1000;
+              if (totalElapsed > 0.1) {
                 const estimatedTokens = Math.round(geminiCharCount / 4);
-                const tps = Math.round(estimatedTokens / elapsed);
+                const tps = elapsedStreaming > 0.05
+                  ? Math.round(estimatedTokens / elapsedStreaming)
+                  : 0;
 
                 let badge = geminiTitle.querySelector('.speed-badge');
                 if (!badge) {
@@ -381,7 +385,7 @@ async function handleSearch(query, elements, roleSelect, envSelect) {
                   badge.className = 'speed-badge';
                   geminiTitle.append(badge);
                 }
-                badge.innerHTML = `⚡ ${tps.toLocaleString()} tok/s in ${elapsed.toFixed(1)}s`;
+                badge.innerHTML = `⚡ ${tps.toLocaleString()} tok/s in ${totalElapsed.toFixed(1)}s`;
               }
 
               geminiText.innerHTML = parseMarkdown(geminiTextAccumulated);
@@ -399,10 +403,13 @@ async function handleSearch(query, elements, roleSelect, envSelect) {
               cerebrasTextAccumulated += data.content;
               cerebrasCharCount += data.content.length;
 
-              const elapsed = (Date.now() - cerebrasStartTime) / 1000;
-              if (elapsed > 0.1) {
+              const totalElapsed = (Date.now() - searchStartTime) / 1000;
+              const elapsedStreaming = (Date.now() - cerebrasStartTime) / 1000;
+              if (totalElapsed > 0.1) {
                 const estimatedTokens = Math.round(cerebrasCharCount / 4);
-                const tps = Math.round(estimatedTokens / elapsed);
+                const tps = elapsedStreaming > 0.05
+                  ? Math.round(estimatedTokens / elapsedStreaming)
+                  : 0;
 
                 let badge = cerebrasTitle.querySelector('.speed-badge');
                 if (!badge) {
@@ -410,7 +417,7 @@ async function handleSearch(query, elements, roleSelect, envSelect) {
                   badge.className = 'speed-badge';
                   cerebrasTitle.append(badge);
                 }
-                badge.innerHTML = `⚡ ${tps.toLocaleString()} tok/s in ${elapsed.toFixed(1)}s`;
+                badge.innerHTML = `⚡ ${tps.toLocaleString()} tok/s in ${totalElapsed.toFixed(1)}s`;
               }
 
               cerebrasText.innerHTML = parseMarkdown(cerebrasTextAccumulated);
