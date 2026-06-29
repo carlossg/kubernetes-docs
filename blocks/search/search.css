@@ -9,6 +9,43 @@
   padding: 2rem 1rem;
 }
 
+.search .search-filters {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.search .filter-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.search .filter-group label {
+  font-size: 0.9rem;
+  color: #5f6368;
+  font-weight: 500;
+}
+
+.search .filter-select {
+  padding: 0.4rem 0.8rem;
+  border-radius: 16px;
+  border: 1px solid #dadce0;
+  background-color: #fff;
+  color: #3c4043;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  outline: none;
+}
+
+.search .filter-select:focus {
+  border-color: #326ce5;
+  box-shadow: 0 0 0 2px rgb(50 108 229 / 20%);
+}
+
 .search .search-input-container {
   position: relative;
   display: flex;

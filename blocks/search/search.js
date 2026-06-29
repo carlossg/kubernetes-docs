@@ -20,7 +20,65 @@ function createSearchBox() {
   inputContainer.append(icon, input);
   container.append(inputContainer);
 
-  return { container, input };
+  // Filters Container
+  const filters = document.createElement('div');
+  filters.className = 'search-filters';
+
+  // Role Selector
+  const filterRole = document.createElement('div');
+  filterRole.className = 'filter-group';
+  const roleLabel = document.createElement('label');
+  roleLabel.setAttribute('for', 'search-level');
+  roleLabel.textContent = 'Role / Perspective:';
+  const roleSelect = document.createElement('select');
+  roleSelect.id = 'search-level';
+  roleSelect.className = 'filter-select';
+
+  const roles = [
+    { value: 'beginner', label: 'Beginner (concepts explained)' },
+    { value: 'developer', label: 'Developer (application manifests)' },
+    { value: 'operator', label: 'Cluster Operator (admin/troubleshooting)' },
+  ];
+  roles.forEach((role) => {
+    const opt = document.createElement('option');
+    opt.value = role.value;
+    opt.textContent = role.label;
+    if (role.value === 'developer') opt.selected = true;
+    roleSelect.append(opt);
+  });
+  filterRole.append(roleLabel, roleSelect);
+
+  // Env Selector
+  const filterEnv = document.createElement('div');
+  filterEnv.className = 'filter-group';
+  const envLabel = document.createElement('label');
+  envLabel.setAttribute('for', 'search-env');
+  envLabel.textContent = 'Target Cluster:';
+  const envSelect = document.createElement('select');
+  envSelect.id = 'search-env';
+  envSelect.className = 'filter-select';
+
+  const envs = [
+    { value: 'standard', label: 'Standard (Minikube/Kind)' },
+    { value: 'gke', label: 'Google GKE' },
+    { value: 'eks', label: 'Amazon EKS' },
+    { value: 'aks', label: 'Azure AKS' },
+  ];
+  envs.forEach((env) => {
+    const opt = document.createElement('option');
+    opt.value = env.value;
+    opt.textContent = env.label;
+    if (env.value === 'standard') opt.selected = true;
+    envSelect.append(opt);
+  });
+  filterEnv.append(envLabel, envSelect);
+
+  filters.append(filterRole, filterEnv);
+  container.append(filters);
+
+  return {
+    container, input, roleSelect, envSelect,
+  };
 }
 
 function createResultsContainer() {
@@ -222,7 +280,7 @@ function parseMarkdown(text) {
   return html;
 }
 
-async function handleSearch(query, elements) {
+async function handleSearch(query, elements, roleSelect, envSelect) {
   const {
     cerebrasCol, cerebrasTitle, cerebrasText, cerebrasCursor,
     geminiCol, geminiTitle, geminiText, geminiCursor,
@@ -244,16 +302,22 @@ async function handleSearch(query, elements) {
   const gBadge = geminiTitle.querySelector('.speed-badge');
   if (gBadge) gBadge.remove();
 
-  // Update the URL query parameter
+  // Update the URL query parameters
   const url = new URL(window.location.href);
   url.searchParams.set('q', query);
+  if (roleSelect) url.searchParams.set('level', roleSelect.value);
+  if (envSelect) url.searchParams.set('env', envSelect.value);
   window.history.replaceState({}, '', url.toString());
 
   try {
     const response = await fetch(BACKEND_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query }),
+      body: JSON.stringify({
+        query,
+        level: roleSelect ? roleSelect.value : 'developer',
+        env: envSelect ? envSelect.value : 'standard',
+      }),
     });
 
     if (!response.ok) {
@@ -368,7 +432,9 @@ async function handleSearch(query, elements) {
 export default async function decorate(block) {
   block.innerHTML = ''; // Clear default block content
 
-  const { container: searchBox, input } = createSearchBox();
+  const {
+    container: searchBox, input, roleSelect, envSelect,
+  } = createSearchBox();
   const results = createResultsContainer();
 
   block.append(searchBox, results.container);
@@ -380,7 +446,7 @@ export default async function decorate(block) {
     if (e.key === 'Enter') {
       const query = input.value.trim();
       if (query.length > 2) {
-        handleSearch(query, results);
+        handleSearch(query, results, roleSelect, envSelect);
       }
     }
   });
@@ -388,8 +454,14 @@ export default async function decorate(block) {
   // Check URL parameters on load
   const searchParams = new URLSearchParams(window.location.search);
   const initialQuery = searchParams.get('q');
+  const initialLevel = searchParams.get('level');
+  const initialEnv = searchParams.get('env');
+
+  if (initialLevel && roleSelect) roleSelect.value = initialLevel;
+  if (initialEnv && envSelect) envSelect.value = initialEnv;
+
   if (initialQuery) {
     input.value = initialQuery;
-    handleSearch(initialQuery, results);
+    handleSearch(initialQuery, results, roleSelect, envSelect);
   }
 }
