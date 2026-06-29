@@ -305,7 +305,7 @@ async function handleSearch(query, elements) {
                   badge.className = 'speed-badge';
                   geminiTitle.append(badge);
                 }
-                badge.innerHTML = `⚡ ${tps.toLocaleString()} tok/s`;
+                badge.innerHTML = `⚡ ${tps.toLocaleString()} tok/s in ${elapsed.toFixed(1)}s`;
               }
 
               geminiText.innerHTML = parseMarkdown(geminiTextAccumulated);
@@ -328,7 +328,7 @@ async function handleSearch(query, elements) {
                   badge.className = 'speed-badge';
                   cerebrasTitle.append(badge);
                 }
-                badge.innerHTML = `⚡ ${tps.toLocaleString()} tok/s`;
+                badge.innerHTML = `⚡ ${tps.toLocaleString()} tok/s in ${elapsed.toFixed(1)}s`;
               }
 
               cerebrasText.innerHTML = parseMarkdown(cerebrasTextAccumulated);
