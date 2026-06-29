@@ -46,6 +46,27 @@
   box-shadow: 0 0 0 2px rgb(50 108 229 / 20%);
 }
 
+/* Dark Background Banner Overrides (Home Page) */
+.docs-home-banner .search .filter-group label {
+  color: rgb(255 255 255 / 90%);
+}
+
+.docs-home-banner .search .filter-select {
+  background-color: rgb(255 255 255 / 15%);
+  border-color: rgb(255 255 255 / 30%);
+  color: #fff;
+}
+
+.docs-home-banner .search .filter-select option {
+  background-color: #fff;
+  color: #3c4043;
+}
+
+.docs-home-banner .search .filter-select:focus {
+  border-color: #fff;
+  box-shadow: 0 0 0 2px rgb(255 255 255 / 20%);
+}
+
 .search .search-input-container {
   position: relative;
   display: flex;
