@@ -25,7 +25,7 @@ const COLLECTION_NAME = 'k8s_docs';
 
 app.post('/api/search', async (req, res) => {
   try {
-    const { query } = req.body;
+    const { query, level = 'developer', env = 'standard' } = req.body;
     if (!query) {
       return res.status(400).json({ error: 'Query is required' });
     }
@@ -89,9 +89,29 @@ app.post('/api/search', async (req, res) => {
     const citations = docs.map(d => ({ title: d.title, url: d.url, snippet: d.content.substring(0, 150) + "..." }));
     res.write(JSON.stringify({ type: 'citations', citations }) + '\n');
 
-    // 4. Construct Context for Cerebras
-    const context = docs.map((d, i) => `[${i+1}] ${d.title}\n${d.content}`).join('\n\n');
-    const systemPrompt = `You are a Kubernetes documentation assistant. Answer the user's question using ONLY the provided context. If the context doesn't contain the answer, say you don't know.\n\nContext:\n${context}`;
+    // 4. Construct Context for LLMs
+    const context = docs.map((d, i) => `[${i + 1}] ${d.title}\n${d.content}`).join('\n\n');
+    let systemPrompt = `You are an expert Kubernetes assistant. Answer the user's question using the provided context. You may augment this context with target cloud-native platform specifications (like GKE, EKS, or AKS features) as specified in the environment rules below. If the core answer cannot be found in the context, say "I don't know." and do not make anything up. Always format your answer in clean HTML (using tags like <p>, <ul>, <li>, <strong>, <em>, <pre><code class="language-yaml">). Do not wrap the entire response in markdown block ticks, only return the HTML itself. Ensure all YAML or code snippets use exact resource names if mentioned in the query (e.g. if the user asks about deployment "myapp", use "myapp" in the YAML instead of generic names like "my-deployment").\n\nContext:\n${context}`;
+
+    // Experience Level personalization
+    if (level === 'beginner') {
+      systemPrompt += '\n\nExplain basic terms, concepts, and architectural details before providing manifests. Keep the tone highly educational, clear, and beginner-friendly.';
+    } else if (level === 'developer') {
+      systemPrompt += '\n\nFocus strictly on application manifests, pod specifications, environment variables, container settings, and local volume mounts. Keep explanations highly concise and developer-centric.';
+    } else if (level === 'operator') {
+      systemPrompt += '\n\nFocus on cluster-wide administration, operational commands, troubleshooting flags, RBAC policies, custom resources, controller components, and production-grade settings.';
+    }
+
+    // Target Environment personalization
+    if (env === 'standard') {
+      systemPrompt += '\n\nAssume a standard Kubernetes cluster (like Minikube, Kind, or bare metal).';
+    } else if (env === 'gke') {
+      systemPrompt += '\n\nOptimize all advice, commands, and YAML manifests specifically for Google Kubernetes Engine (GKE). Integrate and mention GKE-native features (e.g., GKE-managed Metrics Server, Workload Identity, GCP cloud logging, GKE ingress controller, Google Cloud storage storageclass) where applicable.';
+    } else if (env === 'eks') {
+      systemPrompt += '\n\nOptimize all advice, commands, and YAML manifests specifically for Amazon Elastic Kubernetes Service (EKS). Integrate and mention EKS-native features (e.g., EKS load balancer controller annotations, IAM Roles for Service Accounts (IRSA), AWS CloudWatch, AWS storage classes) where applicable.';
+    } else if (env === 'aks') {
+      systemPrompt += '\n\nOptimize all advice, commands, and YAML manifests specifically for Azure Kubernetes Service (AKS). Integrate and mention AKS-native features (e.g., Azure Active Directory pod identity, Azure Files/Disk CSI driver, AKS load balancer settings, Azure Monitor) where applicable.';
+    }
 
     // 5. Concurrently stream Cerebras and Gemini
     const cerebrasPromise = (async () => {

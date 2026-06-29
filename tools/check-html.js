@@ -3,7 +3,7 @@ const { chromium } = require('playwright');
 async function checkHTML() {
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
-  const url = 'https://main--kubernetes-docs--carlossg.aem.page/?q=how%20do%20I%20use%20vpa';
+  const url = 'https://main--kubernetes-docs--carlossg.aem.page/?q=how%20do%20I%20use%20vpa&level=developer&env=gke';
   
   console.log(`Loading ${url}...`);
   await page.goto(url, { waitUntil: 'load', timeout: 30000 });
