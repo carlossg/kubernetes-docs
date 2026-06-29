@@ -4,7 +4,7 @@ require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 const express = require('express');
 const cors = require('cors');
 const { Firestore, FieldValue } = require('@google-cloud/firestore');
-const { VertexAI } = require('@google-cloud/vertexai');
+const { GoogleGenAI } = require('@google/genai');
 const Cerebras = require('@cerebras/cerebras_cloud_sdk');
 
 const app = express();
@@ -15,7 +15,7 @@ app.use(express.json());
 const { GoogleAuth } = require('google-auth-library');
 const projectId = process.env.GOOGLE_CLOUD_PROJECT || 'api-project-642841493686';
 const firestore = new Firestore({ projectId });
-const vertex_ai = new VertexAI({ project: projectId, location: 'us-central1' });
+const ai = new GoogleGenAI({});
 const auth = new GoogleAuth({ scopes: ['https://www.googleapis.com/auth/cloud-platform'] });
 // Cerebras client automatically uses CEREBRAS_API_KEY environment variable
 const cerebras = new Cerebras(); 
@@ -93,24 +93,52 @@ app.post('/api/search', async (req, res) => {
     const context = docs.map((d, i) => `[${i+1}] ${d.title}\n${d.content}`).join('\n\n');
     const systemPrompt = `You are a Kubernetes documentation assistant. Answer the user's question using ONLY the provided context. If the context doesn't contain the answer, say you don't know.\n\nContext:\n${context}`;
 
-    // 5. Generate Answer with Cerebras (Gemma)
-    const stream = await cerebras.chat.completions.create({
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: query }
-      ],
-      model: 'gemma-4-31b',
-      stream: true,
-      max_tokens: 1024,
-    });
+    // 5. Concurrently stream Cerebras and Gemini
+    const cerebrasPromise = (async () => {
+      try {
+        const stream = await cerebras.chat.completions.create({
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: query }
+          ],
+          model: 'gemma-4-31b',
+          stream: true,
+          max_tokens: 1024,
+        });
 
-    for await (const chunk of stream) {
-      const content = chunk.choices[0]?.delta?.content || '';
-      if (content) {
-        res.write(JSON.stringify({ type: 'text', content }) + '\n');
+        for await (const chunk of stream) {
+          const content = chunk.choices[0]?.delta?.content || '';
+          if (content) {
+            res.write(JSON.stringify({ type: 'text', content, provider: 'cerebras', model: 'gemma-4-31b' }) + '\n');
+          }
+        }
+      } catch (err) {
+        console.error("Cerebras stream failed:", err.message);
+        res.write(JSON.stringify({ type: 'text', content: '\n\nCerebras failed: ' + err.message, provider: 'cerebras', model: 'gemma-4-31b' }) + '\n');
       }
-    }
+    })();
 
+    const geminiPromise = (async () => {
+      try {
+        const responseStream = await ai.models.generateContentStream({
+          model: 'gemini-3.5-flash',
+          contents: [
+            { role: 'user', parts: [{ text: systemPrompt + "\n\nUser Question:\n" + query }] }
+          ]
+        });
+        for await (const chunk of responseStream) {
+          const content = chunk.text || '';
+          if (content) {
+            res.write(JSON.stringify({ type: 'text', content, provider: 'gemini', model: 'gemini-3.5-flash' }) + '\n');
+          }
+        }
+      } catch (err) {
+        console.error("Gemini stream completely failed:", err.message);
+        res.write(JSON.stringify({ type: 'text', content: '\n\nGemini failed: ' + err.message, provider: 'gemini', model: 'gemini-failed' }) + '\n');
+      }
+    })();
+
+    await Promise.all([cerebrasPromise, geminiPromise]);
     res.end();
   } catch (error) {
     console.error('API Error:', error);

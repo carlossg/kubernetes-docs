@@ -13,6 +13,8 @@ async function checkHTML() {
   const gCol = await page.waitForSelector('.gemini-col .ai-text', { timeout: 20000 });
   await page.waitForTimeout(6000); // Allow both streams to settle
   
+  const cTitle = await page.$eval('.cerebras-col .ai-title span', el => el.innerText).catch(() => 'No title');
+  const gTitle = await page.$eval('.gemini-col .ai-title span', el => el.innerText).catch(() => 'No title');
   const cBadge = await page.$eval('.cerebras-col .speed-badge', el => el.innerText).catch(() => 'No speed badge');
   const gBadge = await page.$eval('.gemini-col .speed-badge', el => el.innerText).catch(() => 'No speed badge');
   
@@ -20,12 +22,14 @@ async function checkHTML() {
   const gHtml = await gCol.innerHTML();
   
   console.log('\n=============================================');
-  console.log(`[Cerebras / Gemma 4] Badge: ${cBadge}`);
+  console.log(`Title: ${cTitle}`);
+  console.log(`Badge: ${cBadge}`);
   console.log('=============================================');
   console.log(cHtml);
   
   console.log('\n=============================================');
-  console.log(`[Gemini / Flash] Badge: ${gBadge}`);
+  console.log(`Title: ${gTitle}`);
+  console.log(`Badge: ${gBadge}`);
   console.log('=============================================');
   console.log(gHtml);
   console.log('=============================================\n');
