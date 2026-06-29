@@ -20,7 +20,7 @@ export default async function decorate(block) {
   block.textContent = '';
   const footer = document.createElement('div');
   footer.className = 'footer-content';
-  
+
   if (fragment) {
     while (fragment.firstElementChild) footer.append(fragment.firstElementChild);
   }

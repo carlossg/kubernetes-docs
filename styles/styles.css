@@ -327,7 +327,7 @@ main .section.highlight {
 /* Docs Home Landing Page Layout & Cards */
 .docs-home-banner {
   background: linear-gradient(135deg, #326ce5 0%, #1d59d1 100%);
-  color: #ffffff;
+  color: #fff;
   padding: 4.5rem 1.5rem;
   text-align: center;
   
@@ -336,29 +336,25 @@ main .section.highlight {
   position: relative;
   left: 50%;
   right: 50%;
-  margin-left: -50vw;
-  margin-right: -50vw;
-  box-sizing: border-box;
-  
-  margin-top: -40px; /* Offset the default main margin-top */
-  margin-bottom: 3.5rem;
-  box-shadow: inset 0 -10px 20px rgba(0, 0, 0, 0.05);
+  margin: -40px -50vw 3.5rem;
+  box-sizing: border-box; /* Offset the default main margin-top */
+  box-shadow: inset 0 -10px 20px rgb(0 0 0 / 5%);
 }
 
 .docs-home-banner > h1 {
-  color: #ffffff !important;
+  color: #fff !important;
   margin-top: 0;
   font-size: 3.25rem;
   font-weight: 800;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  text-shadow: 0 2px 4px rgb(0 0 0 / 10%);
   text-align: center;
 }
 
 .docs-home-banner > p {
-  color: rgba(255, 255, 255, 0.9) !important;
+  color: rgb(255 255 255 / 90%) !important;
   font-size: 1.25rem;
   max-width: 700px;
-  margin: 0 auto 2rem auto;
+  margin: 0 auto 2rem;
   text-align: center;
 }
 
@@ -370,7 +366,7 @@ main .section.highlight {
 }
 
 .docs-home-banner .search-input-container {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 15%);
 }
 
 /* Card Grid Layout */
@@ -383,13 +379,13 @@ main .section.highlight {
   list-style: none;
 }
 
-@media (min-width: 768px) {
+@media (width >= 768px) {
   .docs-home-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (min-width: 1024px) {
+@media (width >= 1024px) {
   .docs-home-grid {
     grid-template-columns: repeat(3, 1fr);
   }
@@ -397,12 +393,12 @@ main .section.highlight {
 
 /* Card Container */
 .docs-home-card {
-  background: #ffffff;
+  background: #fff;
   border: 1px solid #e0e0e0;
   border-radius: 12px;
   padding: 1.75rem;
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02), 0 1px 3px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 4px 6px rgb(0 0 0 / 2%), 0 1px 3px rgb(0 0 0 / 2%);
   display: flex;
   flex-direction: column;
 }
@@ -410,7 +406,7 @@ main .section.highlight {
 /* Card Hover Elevation */
 .docs-home-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(50, 108, 229, 0.08), 0 2px 4px rgba(50, 108, 229, 0.04);
+  box-shadow: 0 8px 16px rgb(50 108 229 / 8%), 0 2px 4px rgb(50 108 229 / 4%);
   border-color: var(--link-color);
 }
 
