@@ -131,47 +131,47 @@ function decorateButtons(main) {
  * @param {Element} main The main container element
  */
 function decorateCardsList(main) {
-  const isHomePage = window.location.pathname === '/' 
-    || window.location.pathname === '/index.html' 
+  const isHomePage = window.location.pathname === '/'
+    || window.location.pathname === '/index.html'
     || window.location.pathname.endsWith('/');
-    
+
   if (isHomePage) {
     const list = main.querySelector('ul');
     if (list) {
       list.classList.add('docs-home-grid');
-      
+
       const items = list.querySelectorAll('li');
-      items.forEach(item => {
+      items.forEach((item) => {
         item.classList.add('docs-home-card');
-        
+
         // Find the anchor tag
         const a = item.querySelector('a');
         if (a) {
           // Extract text nodes for description
           let description = '';
-          item.childNodes.forEach(node => {
+          item.childNodes.forEach((node) => {
             if (node.nodeType === Node.TEXT_NODE) {
               description += node.textContent;
             }
           });
-          
+
           // Remove leading " - " or " – "
-          description = description.replace(/^\s*[\-\–]\s*/, '').trim();
-          
+          description = description.replace(/^\s*[-–]\s*/, '').trim();
+
           // Rebuild item DOM
           item.innerHTML = '';
-          
+
           const cardLink = document.createElement('a');
           cardLink.href = a.href;
           cardLink.className = 'card-title';
           cardLink.textContent = a.textContent;
-          
+
           const cardDesc = document.createElement('p');
           cardDesc.className = 'card-desc';
           cardDesc.textContent = description;
-          
+
           item.append(cardLink, cardDesc);
-          
+
           // Make the whole card container clickable
           item.addEventListener('click', (e) => {
             if (e.target !== cardLink && !e.target.closest('a')) {
@@ -190,27 +190,27 @@ function decorateCardsList(main) {
  * @param {Element} main The main container element
  */
 function decorateHeroBanner(main) {
-  const isHomePage = window.location.pathname === '/' 
-    || window.location.pathname === '/index.html' 
+  const isHomePage = window.location.pathname === '/'
+    || window.location.pathname === '/index.html'
     || window.location.pathname.endsWith('/');
-    
+
   if (isHomePage) {
     const h1 = main.querySelector('h1');
     const searchWrapper = main.querySelector('.search-wrapper');
-    
+
     if (h1 && searchWrapper) {
       const banner = document.createElement('div');
       banner.className = 'docs-home-banner';
       h1.before(banner);
-      
+
       banner.append(h1);
-      
+
       // If there's a paragraph after the banner (originally after h1), it is the subtitle
       const subtitle = banner.nextElementSibling;
       if (subtitle && subtitle.tagName === 'P' && !subtitle.classList.contains('search-wrapper')) {
         banner.append(subtitle);
       }
-      
+
       banner.append(searchWrapper);
     }
   }

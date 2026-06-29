@@ -62,21 +62,27 @@ function createResultsContainer() {
 
   container.append(compareGrid, citationsList);
 
-  return { 
-    container, 
+  return {
+    container,
     compareGrid,
-    cerebrasCol, cerebrasTitle, cerebrasText, cerebrasCursor,
-    geminiCol, geminiTitle, geminiText, geminiCursor,
-    citationsList 
+    cerebrasCol,
+    cerebrasTitle,
+    cerebrasText,
+    cerebrasCursor,
+    geminiCol,
+    geminiTitle,
+    geminiText,
+    geminiCursor,
+    citationsList,
   };
 }
 
 function cleanMarkdownSnippet(text) {
   if (!text) return '';
   return text
-    .replace(/```\w*/g, '')        // Remove code block ticks and language tags (e.g. ```yaml)
-    .replace(/[`\*#_\-\+]/g, '')   // Remove markdown symbols (ticks, asterisks, hashes, bullet indicators)
-    .replace(/\s+/g, ' ')          // Flatten newlines and multiple spaces into single spaces
+    .replace(/```\w*/g, '') // Remove code block ticks and language tags (e.g. ```yaml)
+    .replace(/[`*#_+-]/g, '') // Remove markdown symbols (ticks, asterisks, hashes, bullet indicators)
+    .replace(/\s+/g, ' ') // Flatten newlines and multiple spaces into single spaces
     .trim();
 }
 
@@ -86,18 +92,18 @@ function renderCitations(citations, container) {
     container.classList.add('hidden');
     return;
   }
-  
+
   container.classList.remove('hidden');
-  
+
   // Group citations by URL to avoid duplicate cards
   const grouped = {};
   citations.forEach((cit) => {
-    const url = cit.url;
+    const { url } = cit;
     if (!grouped[url]) {
       grouped[url] = {
         title: cit.title || url,
-        url: url,
-        snippets: []
+        url,
+        snippets: [],
       };
     }
     const cleanSnippet = cleanMarkdownSnippet(cit.snippet);
@@ -105,22 +111,22 @@ function renderCitations(citations, container) {
       grouped[url].snippets.push(cleanSnippet);
     }
   });
-  
+
   // Render consolidated cards
   Object.values(grouped).forEach((doc) => {
     const li = document.createElement('li');
     li.className = 'citation-card';
-    
+
     const a = document.createElement('a');
     a.href = doc.url;
     a.target = '_blank';
     a.textContent = doc.title;
-    
+
     li.append(a);
-    
+
     const snippetsDiv = document.createElement('div');
     snippetsDiv.className = 'citation-snippets';
-    
+
     // Show up to 2 unique snippets per source to keep the card compact
     doc.snippets.slice(0, 2).forEach((snippet) => {
       const p = document.createElement('p');
@@ -128,7 +134,7 @@ function renderCitations(citations, container) {
       p.textContent = snippet;
       snippetsDiv.append(p);
     });
-    
+
     li.append(snippetsDiv);
     container.append(li);
   });
@@ -172,8 +178,8 @@ function parseMarkdown(text) {
   // 4. Bullet lists
   const lines = html.split('\n');
   let inList = false;
-  const processedLines = lines.map(line => {
-    const listMatch = line.match(/^\s*[\*\-]\s+(.*)$/);
+  const processedLines = lines.map((line) => {
+    const listMatch = line.match(/^\s*[*-]\s+(.*)$/);
     if (listMatch) {
       let content = listMatch[1];
       // Inline formatting for list items
@@ -181,16 +187,15 @@ function parseMarkdown(text) {
       content = content.replace(/\*([^*]+)\*/g, '<em>$1</em>');
       if (!inList) {
         inList = true;
-        return '<ul><li>' + content + '</li>';
+        return `<ul><li>${content}</li>`;
       }
-      return '<li>' + content + '</li>';
-    } else {
-      if (inList && line.trim() !== '') {
-        inList = false;
-        return '</ul>' + line;
-      }
-      return line;
+      return `<li>${content}</li>`;
     }
+    if (inList && line.trim() !== '') {
+      inList = false;
+      return `</ul>${line}`;
+    }
+    return line;
   });
   if (inList) processedLines.push('</ul>');
   html = processedLines.join('\n');
@@ -200,13 +205,13 @@ function parseMarkdown(text) {
   html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
 
   // 6. Paragraphs (split by double newlines)
-  html = html.split(/\n\n+/).map(para => {
-    para = para.trim();
-    if (!para) return '';
-    if (para.startsWith('<h') || para.startsWith('<pre') || para.startsWith('<ul') || para.startsWith('<li>') || para.startsWith('</ul')) {
-      return para;
+  html = html.split(/\n\n+/).map((para) => {
+    const trimmed = para.trim();
+    if (!trimmed) return '';
+    if (trimmed.startsWith('<h') || trimmed.startsWith('<pre') || trimmed.startsWith('<ul') || trimmed.startsWith('<li>') || trimmed.startsWith('</ul')) {
+      return trimmed;
     }
-    return `<p>${para.replace(/\n/g, '<br>')}</p>`;
+    return `<p>${trimmed.replace(/\n/g, '<br>')}</p>`;
   }).join('');
 
   // Restore code blocks
@@ -218,16 +223,16 @@ function parseMarkdown(text) {
 }
 
 async function handleSearch(query, elements) {
-  const { 
+  const {
     cerebrasCol, cerebrasTitle, cerebrasText, cerebrasCursor,
     geminiCol, geminiTitle, geminiText, geminiCursor,
-    citationsList 
+    citationsList,
   } = elements;
-  
+
   cerebrasCol.classList.remove('hidden');
   geminiCol.classList.remove('hidden');
   citationsList.classList.add('hidden');
-  
+
   cerebrasText.textContent = '';
   geminiText.textContent = '';
   cerebrasCursor.style.display = 'inline-block';
@@ -248,7 +253,7 @@ async function handleSearch(query, elements) {
     const response = await fetch(BACKEND_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query })
+      body: JSON.stringify({ query }),
     });
 
     if (!response.ok) {
@@ -257,22 +262,28 @@ async function handleSearch(query, elements) {
 
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
-    
+
     let cerebrasTextAccumulated = '';
     let geminiTextAccumulated = '';
     let cerebrasStartTime = null;
     let geminiStartTime = null;
     let cerebrasCharCount = 0;
     let geminiCharCount = 0;
-    
-    while (true) {
+
+    let reading = true;
+    while (reading) {
+      // eslint-disable-next-line no-await-in-loop
       const { done, value } = await reader.read();
-      if (done) break;
-      
+      if (done) {
+        reading = false;
+        break;
+      }
+
       const chunk = decoder.decode(value, { stream: true });
-      const lines = chunk.split('\n').filter(line => line.trim() !== '');
-      
-      for (const line of lines) {
+      const lines = chunk.split('\n').filter((line) => line.trim() !== '');
+
+      // eslint-disable-next-line no-loop-func
+      lines.forEach((line) => {
         try {
           const data = JSON.parse(line);
           if (data.type === 'text') {
@@ -282,12 +293,12 @@ async function handleSearch(query, elements) {
               }
               geminiTextAccumulated += data.content;
               geminiCharCount += data.content.length;
-              
+
               const elapsed = (Date.now() - geminiStartTime) / 1000;
               if (elapsed > 0.1) {
                 const estimatedTokens = Math.round(geminiCharCount / 4);
                 const tps = Math.round(estimatedTokens / elapsed);
-                
+
                 let badge = geminiTitle.querySelector('.speed-badge');
                 if (!badge) {
                   badge = document.createElement('span');
@@ -296,7 +307,7 @@ async function handleSearch(query, elements) {
                 }
                 badge.innerHTML = `⚡ ${tps.toLocaleString()} tok/s`;
               }
-              
+
               geminiText.innerHTML = parseMarkdown(geminiTextAccumulated);
             } else {
               // Default to Cerebras
@@ -305,12 +316,12 @@ async function handleSearch(query, elements) {
               }
               cerebrasTextAccumulated += data.content;
               cerebrasCharCount += data.content.length;
-              
+
               const elapsed = (Date.now() - cerebrasStartTime) / 1000;
               if (elapsed > 0.1) {
                 const estimatedTokens = Math.round(cerebrasCharCount / 4);
                 const tps = Math.round(estimatedTokens / elapsed);
-                
+
                 let badge = cerebrasTitle.querySelector('.speed-badge');
                 if (!badge) {
                   badge = document.createElement('span');
@@ -319,18 +330,20 @@ async function handleSearch(query, elements) {
                 }
                 badge.innerHTML = `⚡ ${tps.toLocaleString()} tok/s`;
               }
-              
+
               cerebrasText.innerHTML = parseMarkdown(cerebrasTextAccumulated);
             }
           } else if (data.type === 'citations') {
             renderCitations(data.citations, citationsList);
           }
         } catch (e) {
+          // eslint-disable-next-line no-console
           console.error('Error parsing stream chunk', e, line);
         }
-      }
+      });
     }
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Search failed:', error);
     cerebrasText.innerHTML = '<span class="search-error">Sorry, an error occurred while searching.</span>';
     geminiText.innerHTML = '<span class="search-error">Sorry, an error occurred while searching.</span>';
@@ -347,7 +360,7 @@ export default async function decorate(block) {
   const results = createResultsContainer();
 
   block.append(searchBox, results.container);
-  
+
   // AEM EDS icon decoration
   decorateIcons(block);
 
