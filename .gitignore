@@ -1,7 +1,12 @@
 .hlx/*
 coverage/*
 logs/*
-node_modules/*
+node_modules/
+**/node_modules/
+.env
+.env.*
+build-demo/
+labs-*/
 
 helix-importer-ui
 .DS_Store
