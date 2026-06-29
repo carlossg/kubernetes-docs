@@ -291,6 +291,12 @@ async function handleSearch(query, elements) {
               if (geminiStartTime === null) {
                 geminiStartTime = Date.now();
               }
+              if (data.model) {
+                const titleSpan = geminiTitle.querySelector('span');
+                if (titleSpan) {
+                  titleSpan.textContent = `♊ Gemini (${data.model})`;
+                }
+              }
               geminiTextAccumulated += data.content;
               geminiCharCount += data.content.length;
 
@@ -313,6 +319,12 @@ async function handleSearch(query, elements) {
               // Default to Cerebras
               if (cerebrasStartTime === null) {
                 cerebrasStartTime = Date.now();
+              }
+              if (data.model) {
+                const titleSpan = cerebrasTitle.querySelector('span');
+                if (titleSpan) {
+                  titleSpan.textContent = `✨ Cerebras (${data.model})`;
+                }
               }
               cerebrasTextAccumulated += data.content;
               cerebrasCharCount += data.content.length;
